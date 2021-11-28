@@ -258,6 +258,7 @@
         socket = new WebSocket(url);
         socket.onopen = function () {
           //XXX: TODO What are you going to do here?
+          console.log("ws opened");
         };
         socket.onerror = function (msg) {
           debug("WebSocket Error:" + msg.data);

@@ -57,3 +57,7 @@ POSSIBILITY OF SUCH DAMAGE.
 - Abram Hindle
 - Cole Mackenzie
 - Zijie Tan (submitted this assignment)
+
+# References
+
+- https://github.com/uofa-cmput404/cmput404-slides/tree/master/examples/WebSocketsExamples
