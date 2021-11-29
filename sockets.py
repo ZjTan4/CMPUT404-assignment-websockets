@@ -93,10 +93,10 @@ def read_ws(ws,client):
     try:
         while True:
             msg = ws.receive()
-            print("Receive Msg: {}".format(msg))
+            #print("Receive Msg: {}".format(msg))
             if msg is not None:
                 packet = json.loads(msg)
-                for entity, value in enumerate(packet):
+                for entity, value in packet.items():
                     myWorld.set(entity, value)
     except:
         pass
@@ -110,6 +110,8 @@ def subscribe_socket(ws):
     myWorld.add_set_listener(client)
     g = gevent.spawn(read_ws, ws, client)
     try:
+        # notify the new client of the current world state
+        ws.send(json.dumps(myWorld.world()))
         while True:
             msg = client.get()
             ws.send(msg)

@@ -130,7 +130,10 @@
 
       function addEntity(entity, data) {
         world[entity] = data;
-        drawNextFrame(); // (but should we?)
+        //drawNextFrame(); // (but should we?)
+        let msg = {};
+        msg[entity] = data;
+        socket.send(JSON.stringify(msg));
         //XXX: Send a XHTML Request that updates the entity you just modified!
       }
       var counter = 0;
@@ -257,8 +260,9 @@
         var url = "ws://" + host + "/subscribe";
         socket = new WebSocket(url);
         socket.onopen = function () {
-          //XXX: TODO What are you going to do here?
-          console.log("ws opened");
+          //XXX: TODO What are you going to do here?\
+          //console.log("ws opened");
+          debug("WebSocket Open:");
         };
         socket.onerror = function (msg) {
           debug("WebSocket Error:" + msg.data);
@@ -266,6 +270,11 @@
         socket.onmessage = function (msg) {
           try {
             debug("WebSocket Recv:" + msg.data);
+            let packet = JSON.parse(msg.data);
+            for (let entity in packet) {
+              world[entity] = packet[entity];
+            }
+            drawNextFrame();
             //XXX: TODO What are you going to do here?
           } catch (e) {
             alert("socket on message: " + e);
