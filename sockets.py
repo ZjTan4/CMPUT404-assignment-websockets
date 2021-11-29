@@ -61,10 +61,27 @@ class World:
 
 myWorld = World()        
 
-def set_listener( entity, data ):
-    ''' do something with the update ! '''
+# def set_listener( entity, data ):
+#     ''' do something with the update ! '''
 
-myWorld.add_set_listener( set_listener )
+# myWorld.add_set_listener( set_listener )
+
+# The following class is from https://github.com/uofa-cmput404/cmput404-slides/tree/master/examples/WebSocketsExamples
+# For each listener, I have to maintain a queue. And a function is stateless
+# , so I use the Client class instead of the function set_listener() above to avoid changing the World class
+class Client:
+    def __init__(self) -> None:
+        self.queue = queue.Queue()
+    
+    def put(self, v) -> None:
+        self.queue.put_nowait(v)
+    
+    def get(self):
+        return self.queue.get()
+
+    def __call__(self, entity, data):
+        v = json.dumps({entity: data})
+        self.put(v)
         
 @app.route('/')
 def hello():
@@ -80,8 +97,19 @@ def read_ws(ws,client):
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
-    # XXX: TODO IMPLEMENT ME
-    return None
+    
+    client = Client()
+    myWorld.add_set_listener(client)
+    g = gevent.spawn(read_ws, ws, client)
+    try:
+        while True:
+            msg = client.get()
+            ws.send(msg)
+    except Exception as e:
+        print("WS Error: {}".format(e))
+    finally:
+        myWorld.listeners.remove(client)
+        gevent.kill(g)
 
 
 # I give this to you, this is how you get the raw body/data portion of a post in flask
@@ -122,7 +150,8 @@ def clear():
 
 
 if __name__ == "__main__":
-    ''' This doesn't work well anymore:
+    ''' 
+        This doesn't work well anymore:
         pip install gunicorn
         and run
         gunicorn -k flask_sockets.worker sockets:app
