@@ -113,6 +113,7 @@ def subscribe_socket(ws):
         # notify the new client of the current world state
         ws.send(json.dumps(myWorld.world()))
         while True:
+            # notigy the clients upon update
             msg = client.get()
             ws.send(msg)
     except Exception as e:

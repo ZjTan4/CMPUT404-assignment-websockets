@@ -44,6 +44,8 @@
       debug("Test");
 
       world = {};
+      globalColor = 0;
+      pulseSpeed = 2;
 
       //XXX: TODO Make this prettier!
       function drawCircle(context, entity) {
@@ -54,7 +56,8 @@
           var y = entity["y"];
           //moveTo(x,y);
           fillStyle = entity["colour"];
-          strokeStyle = fillStyle;
+          //strokeStyle = fillStyle;
+          strokeStyle = "hsla(" + globalColor + ",100%,50%,1)";
           arc(
             x,
             y,
@@ -134,7 +137,6 @@
         let msg = {};
         msg[entity] = data;
         socket.send(JSON.stringify(msg));
-        //XXX: Send a XHTML Request that updates the entity you just modified!
       }
       var counter = 0;
       function addEntityWithoutName(data) {
@@ -253,6 +255,8 @@
       });
 
       function update() {
+        globalColor += pulseSpeed;
+        drawNextFrame();
         drawFrame();
       }
 
@@ -260,7 +264,6 @@
         var url = "ws://" + host + "/subscribe";
         socket = new WebSocket(url);
         socket.onopen = function () {
-          //XXX: TODO What are you going to do here?\
           //console.log("ws opened");
           debug("WebSocket Open:");
         };
@@ -269,13 +272,14 @@
         };
         socket.onmessage = function (msg) {
           try {
-            debug("WebSocket Recv:" + msg.data);
+            // cut the debug message to 150 characters
+            // , to make it prettier
+            debug(("WebSocket Recv:" + msg.data).substring(0, 150));
             let packet = JSON.parse(msg.data);
             for (let entity in packet) {
               world[entity] = packet[entity];
             }
-            drawNextFrame();
-            //XXX: TODO What are you going to do here?
+            //drawNextFrame();
           } catch (e) {
             alert("socket on message: " + e);
           }
