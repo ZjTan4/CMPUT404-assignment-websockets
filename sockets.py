@@ -90,8 +90,16 @@ def hello():
 
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
-    # XXX: TODO IMPLEMENT ME
-    return None
+    try:
+        while True:
+            msg = ws.receive()
+            print("Receive Msg: {}".format(msg))
+            if msg is not None:
+                packet = json.loads(msg)
+                for entity, value in enumerate(packet):
+                    myWorld.set(entity, value)
+    except:
+        pass
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
